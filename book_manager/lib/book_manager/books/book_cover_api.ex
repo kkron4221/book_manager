@@ -10,7 +10,7 @@ defmodule BookManager.Books.BookCoverApi do
         [q: "isbn:#{isbn}"]
       end
 
-      case Finch.nuild(:get, @base_url, [], query_params)
+
 
 
   end
