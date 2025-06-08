@@ -8,7 +8,14 @@ defmodule BookManager.BooksTest do
 
     import BookManager.BooksFixtures
 
-    @invalid_attrs %{title: nil, author: nil, publication_date: nil, publisher: nil, isbn: nil, has_it: nil}
+    @invalid_attrs %{
+      title: nil,
+      author: nil,
+      publication_date: nil,
+      publisher: nil,
+      isbn: nil,
+      has_it: nil
+    }
 
     test "list_books/0 returns all books" do
       book = book_fixture()
@@ -21,7 +28,14 @@ defmodule BookManager.BooksTest do
     end
 
     test "create_book/1 with valid data creates a book" do
-      valid_attrs = %{title: "some title", author: "some author", publication_date: ~D[2025-05-31], publisher: "some publisher", isbn: "some isbn", has_it: true}
+      valid_attrs = %{
+        title: "some title",
+        author: "some author",
+        publication_date: ~D[2025-05-31],
+        publisher: "some publisher",
+        isbn: "some isbn",
+        has_it: true
+      }
 
       assert {:ok, %Book{} = book} = Books.create_book(valid_attrs)
       assert book.title == "some title"
@@ -38,7 +52,15 @@ defmodule BookManager.BooksTest do
 
     test "update_book/2 with valid data updates the book" do
       book = book_fixture()
-      update_attrs = %{title: "some updated title", author: "some updated author", publication_date: ~D[2025-06-01], publisher: "some updated publisher", isbn: "some updated isbn", has_it: false}
+
+      update_attrs = %{
+        title: "some updated title",
+        author: "some updated author",
+        publication_date: ~D[2025-06-01],
+        publisher: "some updated publisher",
+        isbn: "some updated isbn",
+        has_it: false
+      }
 
       assert {:ok, %Book{} = book} = Books.update_book(book, update_attrs)
       assert book.title == "some updated title"

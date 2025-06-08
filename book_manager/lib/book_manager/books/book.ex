@@ -17,7 +17,15 @@ defmodule BookManager.Books.Book do
   @doc false
   def changeset(book, attrs) do
     book
-    |> cast(attrs, [:title, :author, :publication_date, :publisher, :isbn, :registered_at, :has_it])
+    |> cast(attrs, [
+      :title,
+      :author,
+      :publication_date,
+      :publisher,
+      :isbn,
+      :registered_at,
+      :has_it
+    ])
     |> validate_required([:title, :has_it])
   end
 end

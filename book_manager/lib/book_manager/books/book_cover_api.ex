@@ -9,9 +9,5 @@ defmodule BookManager.Books.BookCoverApi do
       else
         [q: "isbn:#{isbn}"]
       end
-
-
-
-
   end
 end

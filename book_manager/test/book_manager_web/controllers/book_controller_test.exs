@@ -3,9 +3,30 @@ defmodule BookManagerWeb.BookControllerTest do
 
   import BookManager.BooksFixtures
 
-  @create_attrs %{title: "some title", author: "some author", publication_date: ~D[2025-05-31], publisher: "some publisher", isbn: "some isbn", has_it: true}
-  @update_attrs %{title: "some updated title", author: "some updated author", publication_date: ~D[2025-06-01], publisher: "some updated publisher", isbn: "some updated isbn", has_it: false}
-  @invalid_attrs %{title: nil, author: nil, publication_date: nil, publisher: nil, isbn: nil, has_it: nil}
+  @create_attrs %{
+    title: "some title",
+    author: "some author",
+    publication_date: ~D[2025-05-31],
+    publisher: "some publisher",
+    isbn: "some isbn",
+    has_it: true
+  }
+  @update_attrs %{
+    title: "some updated title",
+    author: "some updated author",
+    publication_date: ~D[2025-06-01],
+    publisher: "some updated publisher",
+    isbn: "some updated isbn",
+    has_it: false
+  }
+  @invalid_attrs %{
+    title: nil,
+    author: nil,
+    publication_date: nil,
+    publisher: nil,
+    isbn: nil,
+    has_it: nil
+  }
 
   describe "index" do
     test "lists all books", %{conn: conn} do

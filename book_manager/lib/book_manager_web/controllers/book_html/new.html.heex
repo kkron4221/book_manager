@@ -1,6 +1,8 @@
 <.header>
   <p class="text-yellow-600">New Book</p>
-  <:subtitle><p class="text-yellow-600">Use this form to manage book records in your database.</p></:subtitle>
+  <:subtitle>
+    <p class="text-yellow-600">Use this form to manage book records in your database.</p>
+  </:subtitle>
 </.header>
 
 <.book_form changeset={@changeset} action={~p"/books"} />
