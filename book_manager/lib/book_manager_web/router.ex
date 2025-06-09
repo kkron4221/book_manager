@@ -18,7 +18,6 @@ defmodule BookManagerWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    get "/a", PageController, :home_a
 
     resources "/books", BookController
   end
