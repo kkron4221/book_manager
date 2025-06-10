@@ -1,6 +1,7 @@
 defmodule BookManager.Books do
   import Ecto.Query
   alias BookManager.Books.Book
+  alias BookManager.Books.BookCoverApi
   alias BookManager.Repo
 
   @doc """
@@ -45,6 +46,8 @@ defmodule BookManager.Books do
 
   """
   def create_book(attrs \\ %{}) do
+    attrs = maybe_fetch_cover_url(attrs)
+
     %Book{}
     |> Book.changeset(attrs)
     |> Repo.insert()
@@ -63,6 +66,8 @@ defmodule BookManager.Books do
 
   """
   def update_book(%Book{} = book, attrs) do
+    attrs = maybe_fetch_cover_url(attrs)
+
     book
     |> Book.changeset(attrs)
     |> Repo.update()
@@ -96,4 +101,12 @@ defmodule BookManager.Books do
   def change_book(%Book{} = book, attrs \\ %{}) do
     Book.changeset(book, attrs)
   end
+
+  defp maybe_fetch_cover_url(%{"isbn" => isbn} = attrs) when is_binary(isbn) and byte_size(isbn) > 0 do
+    case BookCoverApi.fetch_cover_image_url(isbn) do
+      {:ok, cover_url} -> Map.put(attrs, "cover_url", cover_url)
+      _ -> attrs
+    end
+  end
+  defp maybe_fetch_cover_url(attrs), do: attrs
 end

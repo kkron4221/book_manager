@@ -10,6 +10,7 @@ defmodule BookManager.Books.Book do
     field :isbn, :string
     field :registered_at, :utc_datetime
     field :has_it, :boolean, default: true
+    field :cover_url, :string
 
     timestamps()
   end
@@ -24,7 +25,8 @@ defmodule BookManager.Books.Book do
       :publisher,
       :isbn,
       :registered_at,
-      :has_it
+      :has_it,
+      :cover_url
     ])
     |> validate_required([:title, :has_it])
   end
