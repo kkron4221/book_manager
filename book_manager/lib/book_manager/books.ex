@@ -2,6 +2,7 @@ defmodule BookManager.Books do
   import Ecto.Query
   alias BookManager.Books.Book
   alias BookManager.Books.BookCoverApi
+  alias BookManager.Books.BookCoverUploader
   alias BookManager.Repo
 
   @doc """
@@ -47,6 +48,7 @@ defmodule BookManager.Books do
   """
   def create_book(attrs \\ %{}) do
     attrs = maybe_fetch_cover_url(attrs)
+    attrs = maybe_handle_cover_upload(attrs)
 
     %Book{}
     |> Book.changeset(attrs)
@@ -67,6 +69,7 @@ defmodule BookManager.Books do
   """
   def update_book(%Book{} = book, attrs) do
     attrs = maybe_fetch_cover_url(attrs)
+    attrs = maybe_handle_cover_upload(attrs, book)
 
     book
     |> Book.changeset(attrs)
@@ -86,6 +89,8 @@ defmodule BookManager.Books do
 
   """
   def delete_book(%Book{} = book) do
+    # Delete the cover image if it exists
+    BookCoverUploader.delete_cover(book.cover_url)
     Repo.delete(book)
   end
 
@@ -109,4 +114,23 @@ defmodule BookManager.Books do
     end
   end
   defp maybe_fetch_cover_url(attrs), do: attrs
+
+  defp maybe_handle_cover_upload(%{"cover_image" => %{path: path, filename: filename} = file} = attrs) do
+    case BookCoverUploader.upload_cover(Ecto.UUID.generate(), file) do
+      {:ok, cover_url} -> Map.put(attrs, "cover_url", cover_url)
+      _ -> attrs
+    end
+  end
+  defp maybe_handle_cover_upload(attrs), do: attrs
+
+  defp maybe_handle_cover_upload(%{"cover_image" => %{path: path, filename: filename} = file} = attrs, book) do
+    # Delete old cover if it exists
+    BookCoverUploader.delete_cover(book.cover_url)
+
+    case BookCoverUploader.upload_cover(book.id, file) do
+      {:ok, cover_url} -> Map.put(attrs, "cover_url", cover_url)
+      _ -> attrs
+    end
+  end
+  defp maybe_handle_cover_upload(attrs, _book), do: attrs
 end

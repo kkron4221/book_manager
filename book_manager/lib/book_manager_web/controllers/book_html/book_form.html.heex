@@ -1,4 +1,4 @@
-<.simple_form :let={f} for={@changeset} action={@action}>
+<.simple_form :let={f} for={@changeset} action={@action} multipart>
   <.error :if={@changeset.action}>
     Oops, something went wrong! Please check the errors below.
   </.error>
@@ -8,6 +8,7 @@
   <.input field={f[:publisher]} type="text" label="Publisher" />
   <.input field={f[:isbn]} type="text" label="Isbn" />
   <.input field={f[:has_it]} type="checkbox" label="Has it" />
+  <.input field={f[:cover_image]} type="file" label="Cover Image" accept="image/*" />
   <:actions>
     <.button>Save Book</.button>
   </:actions>
