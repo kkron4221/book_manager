@@ -2,9 +2,14 @@ defmodule BookManager.Books.BookCoverUploader do
   @upload_dir "priv/static/uploads/book_covers"
   @web_path "/uploads/book_covers"
 
-  def upload_cover(book_id, file) do
-    # Create directory if it doesn't exist
+  def init do
+    # Create the uploads directory if it doesn't exist
     File.mkdir_p!(@upload_dir)
+  end
+
+  def upload_cover(book_id, file) do
+    # Ensure directories exist
+    init()
 
     # Generate a unique filename
     extension = Path.extname(file.filename)

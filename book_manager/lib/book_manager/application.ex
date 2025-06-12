@@ -7,6 +7,9 @@ defmodule BookManager.Application do
 
   @impl true
   def start(_type, _args) do
+    # Initialize the uploads directory
+    BookManager.Books.BookCoverUploader.init()
+
     children = [
       BookManagerWeb.Telemetry,
       BookManager.Repo,

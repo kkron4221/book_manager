@@ -20,7 +20,14 @@ config :book_manager, BookManagerWeb.Endpoint,
     layout: false
   ],
   pubsub_server: BookManager.PubSub,
-  live_view: [signing_salt: "7Z09q6Q7"]
+  live_view: [signing_salt: "7Z09q6Q7"],
+  code_reloader: true,
+  debug_errors: true,
+  check_origin: false,
+  watchers: [],
+  root: ".",
+  version: Application.spec(:book_manager, :vsn),
+  static_paths: ~w(assets fonts images uploads favicon.ico robots.txt)
 
 # Configures the mailer
 #
