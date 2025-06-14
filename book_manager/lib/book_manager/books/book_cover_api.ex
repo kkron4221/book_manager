@@ -3,23 +3,25 @@ defmodule BookManager.Books.BookCoverApi do
   @api_key System.get_env("GOOGLE_BOOKS_API_KEY")
 
   def fetch_cover_image_url(isbn) when is_binary(isbn) and byte_size(isbn) > 0 do
-    query_params =
-      if @api_key do
-        [q: "isbn:#{isbn}", key: @api_key]
-      else
-        [q: "isbn:#{isbn}"]
-      end
+    query_string = URI.encode_query(q: "isbn:#{isbn}")
+    url = "#{@base_url}?#{query_string}"
 
-    case Finch.build(:get, @base_url, [], params: query_params) |> Finch.request(BookManager.Finch) do
+    headers = if @api_key, do: [{"x-goog-api-key", @api_key}], else: []
+
+    case Finch.build(:get, url, headers) |> Finch.request(BookManager.Finch) do
       {:ok, %{status: 200, body: body}} ->
         case Jason.decode(body) do
           {:ok, %{"items" => [%{"volumeInfo" => %{"imageLinks" => %{"thumbnail" => url}}} | _]}} ->
             {:ok, url}
-          _ ->
+          {:ok, _} ->
             {:error, :no_cover_found}
+          {:error, _} ->
+            {:error, :invalid_response}
         end
-      _ ->
-        {:error, :api_error}
+      {:ok, %{status: status}} ->
+        {:error, {:http_error, status}}
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 

@@ -9,12 +9,14 @@ defmodule BookManager.Books.Book do
     field :publisher, :string
     field :isbn, :string
     field :registered_at, :utc_datetime
-    field :has_it, :boolean, default: true
+    field :status, :string, default: "owned"
     field :cover_url, :string
     field :cover_image, :any, virtual: true
 
     timestamps()
   end
+
+  @valid_statuses ["owned", "wishlist"]
 
   @doc false
   def changeset(book, attrs) do
@@ -26,10 +28,11 @@ defmodule BookManager.Books.Book do
       :publisher,
       :isbn,
       :registered_at,
-      :has_it,
+      :status,
       :cover_url,
       :cover_image
     ])
-    |> validate_required([:title, :has_it])
+    |> validate_required([:title, :status])
+    |> validate_inclusion(:status, @valid_statuses)
   end
 end

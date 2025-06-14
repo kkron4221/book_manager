@@ -4,8 +4,8 @@ defmodule BookManagerWeb.BookController do
   alias BookManager.Books
   alias BookManager.Books.Book
 
-  def index(conn, _params) do
-    books = Books.list_books()
+  def index(conn, params) do
+    books = Books.list_books(params)
     render(conn, :index, books: books)
   end
 

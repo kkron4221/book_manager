@@ -13,10 +13,20 @@ defmodule BookManager.Books do
       iex> list_books()
       [%Book{}, ...]
 
+      iex> list_books(%{status: "owned"})
+      [%Book{}, ...]
+
   """
-  def list_books do
-    from(b in Book) |> BookManager.Repo.all()
+  def list_books(params \\ %{}) do
+    Book
+    |> filter_by_status(params)
+    |> Repo.all()
   end
+
+  defp filter_by_status(query, %{"status" => status}) when status in ["owned", "wishlist"] do
+    where(query, [b], b.status == ^status)
+  end
+  defp filter_by_status(query, _params), do: query
 
   @doc """
   Gets a single book.
@@ -47,12 +57,21 @@ defmodule BookManager.Books do
 
   """
   def create_book(attrs \\ %{}) do
-    attrs = maybe_fetch_cover_url(attrs)
-    attrs = maybe_handle_cover_upload(attrs)
-
-    %Book{}
-    |> Book.changeset(attrs)
-    |> Repo.insert()
+    with {:ok, attrs} <- maybe_fetch_cover_url(attrs),
+         {:ok, attrs} <- maybe_handle_cover_upload(attrs) do
+      %Book{}
+      |> Book.changeset(attrs)
+      |> Repo.insert()
+    else
+      {:error, :invalid_isbn} ->
+        {:error, %Ecto.Changeset{data: %Book{}, errors: [isbn: {"Invalid ISBN format", []}]}}
+      {:error, :no_cover_found} ->
+        {:error, %Ecto.Changeset{data: %Book{}, errors: [isbn: {"No cover found for this ISBN", []}]}}
+      {:error, {:http_error, status}} ->
+        {:error, %Ecto.Changeset{data: %Book{}, errors: [isbn: {"Error fetching cover (HTTP #{status})", []}]}}
+      {:error, reason} ->
+        {:error, %Ecto.Changeset{data: %Book{}, errors: [isbn: {"Error: #{inspect(reason)}", []}]}}
+    end
   end
 
   @doc """
@@ -68,12 +87,21 @@ defmodule BookManager.Books do
 
   """
   def update_book(%Book{} = book, attrs) do
-    attrs = maybe_fetch_cover_url(attrs)
-    attrs = maybe_handle_cover_upload(attrs, book)
-
-    book
-    |> Book.changeset(attrs)
-    |> Repo.update()
+    with {:ok, attrs} <- maybe_fetch_cover_url(attrs),
+         {:ok, attrs} <- maybe_handle_cover_upload(attrs, book) do
+      book
+      |> Book.changeset(attrs)
+      |> Repo.update()
+    else
+      {:error, :invalid_isbn} ->
+        {:error, %Ecto.Changeset{data: book, errors: [isbn: {"Invalid ISBN format", []}]}}
+      {:error, :no_cover_found} ->
+        {:error, %Ecto.Changeset{data: book, errors: [isbn: {"No cover found for this ISBN", []}]}}
+      {:error, {:http_error, status}} ->
+        {:error, %Ecto.Changeset{data: book, errors: [isbn: {"Error fetching cover (HTTP #{status})", []}]}}
+      {:error, reason} ->
+        {:error, %Ecto.Changeset{data: book, errors: [isbn: {"Error: #{inspect(reason)}", []}]}}
+    end
   end
 
   @doc """
@@ -109,28 +137,28 @@ defmodule BookManager.Books do
 
   defp maybe_fetch_cover_url(%{"isbn" => isbn} = attrs) when is_binary(isbn) and byte_size(isbn) > 0 do
     case BookCoverApi.fetch_cover_image_url(isbn) do
-      {:ok, cover_url} -> Map.put(attrs, "cover_url", cover_url)
-      _ -> attrs
+      {:ok, cover_url} -> {:ok, Map.put(attrs, "cover_url", cover_url)}
+      {:error, reason} -> {:error, reason}
     end
   end
-  defp maybe_fetch_cover_url(attrs), do: attrs
+  defp maybe_fetch_cover_url(attrs), do: {:ok, attrs}
 
   defp maybe_handle_cover_upload(%{"cover_image" => %{path: path, filename: filename} = file} = attrs) do
     case BookCoverUploader.upload_cover(Ecto.UUID.generate(), file) do
-      {:ok, cover_url} -> Map.put(attrs, "cover_url", cover_url)
-      _ -> attrs
+      {:ok, cover_url} -> {:ok, Map.put(attrs, "cover_url", cover_url)}
+      {:error, reason} -> {:error, reason}
     end
   end
-  defp maybe_handle_cover_upload(attrs), do: attrs
+  defp maybe_handle_cover_upload(attrs), do: {:ok, attrs}
 
   defp maybe_handle_cover_upload(%{"cover_image" => %{path: path, filename: filename} = file} = attrs, book) do
     # Delete old cover if it exists
     BookCoverUploader.delete_cover(book.cover_url)
 
     case BookCoverUploader.upload_cover(book.id, file) do
-      {:ok, cover_url} -> Map.put(attrs, "cover_url", cover_url)
-      _ -> attrs
+      {:ok, cover_url} -> {:ok, Map.put(attrs, "cover_url", cover_url)}
+      {:error, reason} -> {:error, reason}
     end
   end
-  defp maybe_handle_cover_upload(attrs, _book), do: attrs
+  defp maybe_handle_cover_upload(attrs, _book), do: {:ok, attrs}
 end
