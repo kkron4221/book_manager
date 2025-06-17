@@ -6,7 +6,7 @@ defmodule BookManagerWeb.BookController do
 
   def index(conn, params) do
     books = Books.list_books(params)
-    render(conn, :index, books: books)
+    render(conn, :index, books: books, status: params["status"])
   end
 
   def new(conn, _params) do

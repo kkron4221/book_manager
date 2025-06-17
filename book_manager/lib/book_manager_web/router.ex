@@ -18,8 +18,8 @@ defmodule BookManagerWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-
-    resources "/books", BookController
+    live "/books", BookLive.Index, :index
+    resources "/books", BookController, except: [:index]
   end
 
   # Other scopes may use custom stacks.
