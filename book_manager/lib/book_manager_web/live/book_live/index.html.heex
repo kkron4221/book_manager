@@ -30,12 +30,12 @@
       </div>
     <% end %>
   </:col>
-  <:col :let={book} label="Title">{book.title}</:col>
-  <:col :let={book} label="Author">{book.author}</:col>
-  <:col :let={book} label="Publication date">{book.publication_date}</:col>
-  <:col :let={book} label="Publisher">{book.publisher}</:col>
-  <:col :let={book} label="Isbn">{book.isbn}</:col>
-  <:col :let={book} label="Status">
+  <:col :let={book} label={render_sort_header("title", "Title", @sort_by, @sort_order)}>{book.title}</:col>
+  <:col :let={book} label={render_sort_header("author", "Author", @sort_by, @sort_order)}>{book.author}</:col>
+  <:col :let={book} label={render_sort_header("publication_date", "Publication date", @sort_by, @sort_order)}>{book.publication_date}</:col>
+  <:col :let={book} label={render_sort_header("publisher", "Publisher", @sort_by, @sort_order)}>{book.publisher}</:col>
+  <:col :let={book} label={render_sort_header("isbn", "ISBN", @sort_by, @sort_order)}>{book.isbn}</:col>
+  <:col :let={book} label={render_sort_header("status", "Status", @sort_by, @sort_order)}>
     <%= if book.status == "owned" do %>
       <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Owned</span>
     <% else %>

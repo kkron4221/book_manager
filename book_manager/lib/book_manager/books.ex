@@ -16,10 +16,14 @@ defmodule BookManager.Books do
       iex> list_books(%{status: "owned"})
       [%Book{}, ...]
 
+      iex> list_books(%{sort_by: "title", sort_order: "asc"})
+      [%Book{}, ...]
+
   """
   def list_books(params \\ %{}) do
     Book
     |> filter_by_status(params)
+    |> sort_books(params)
     |> Repo.all()
   end
 
@@ -27,6 +31,13 @@ defmodule BookManager.Books do
     where(query, [b], b.status == ^status)
   end
   defp filter_by_status(query, _params), do: query
+
+  defp sort_books(query, %{"sort_by" => field, "sort_order" => order})
+       when field in ["title", "author", "publication_date", "publisher", "isbn", "status"] and
+              order in ["asc", "desc"] do
+    order_by(query, [b], [{^String.to_existing_atom(order), ^String.to_existing_atom(field)}])
+  end
+  defp sort_books(query, _params), do: query
 
   @doc """
   Gets a single book.
